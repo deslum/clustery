@@ -2,23 +2,23 @@ package engines
 
 import (
 	"fmt"
-	"github.com/muesli/clusters"
+
 	"github.com/muesli/kmeans"
 )
 
 type Kmeans struct {
 	kmeans   kmeans.Kmeans
-	points   clusters.Observations
-	clusters clusters.Clusters
+	points   kmeans.Points
+	clusters kmeans.Clusters
 	parts    int
 }
 
 func NewKMeans(data [][]float64, parts int) *Kmeans {
 
-	var points clusters.Observations
+	var points kmeans.Points
 
 	for i := 0; i < len(data); i++ {
-		points = append(points, clusters.Coordinates{
+		points = append(points, kmeans.Point{
 			data[i][0],
 			data[i][1],
 		})
