@@ -16,7 +16,7 @@ func NewMock() *Mock {
 	}
 }
 
-func (o *Mock) GetData() ([][]float64, error) {
+func (o *Mock) GetData(query string) ([][]float64, error) {
 
 	var points jsonPoints
 

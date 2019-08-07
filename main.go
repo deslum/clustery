@@ -1,19 +1,26 @@
 package main
 
 import (
+	"clustery/engines"
 	"github.com/golang/glog"
 
 	"clustery/consts"
 	"clustery/dbs"
-	"clustery/engines"
 )
 
 func main() {
 	glog.Flush()
 
-	database := dbs.NewMock()
+	database, err := dbs.Connect(
+		"clickhouse",
+		"",
+	)
 
-	data, err := database.GetData()
+	if err != nil {
+		glog.Fatalf("dbs.Connect() error %v", err)
+	}
+
+	data, err := dbs.NewSQL(database).GetData(consts.QueryTemplate)
 	if err != nil {
 		glog.Fatalf("database.GetData() error %v", err)
 	}
