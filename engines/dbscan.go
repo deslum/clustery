@@ -2,7 +2,6 @@ package engines
 
 import (
 	"fmt"
-
 	gpoint "github.com/smira/go-point-clustering"
 )
 
@@ -32,7 +31,7 @@ func NewDBSCAN(data [][]float64, eps float64, epsNeighborhood int) *DBSCAN {
 
 func (o *DBSCAN) Scan() error {
 	clusters, _ := gpoint.DBScan(o.points, o.eps, o.epsNeighborhood)
-	if len(clusters) <= 1 {
+	if len(clusters) < 1 {
 		return fmt.Errorf("clusters length less 1")
 	}
 

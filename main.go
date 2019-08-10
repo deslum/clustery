@@ -1,7 +1,9 @@
 package main
 
 import (
+	"clustery/config"
 	"clustery/engines"
+	"flag"
 	"github.com/golang/glog"
 
 	"clustery/consts"
@@ -9,41 +11,46 @@ import (
 )
 
 func main() {
+	flag.Parse()
 	glog.Flush()
 
-	database, err := dbs.Connect(
-		"clickhouse",
-		"",
-	)
-
+	cfg, err := config.NewJsonConfig().Fill()
 	if err != nil {
-		glog.Fatalf("dbs.Connect() error %v", err)
+		glog.Fatal(err)
 	}
+	glog.Info(cfg)
 
-	data, err := dbs.NewSQL(database).GetData(consts.QueryTemplate)
+	//database, err := dbs.Connect(
+	//	"clickhouse",
+	//	"",
+	//)
+	//
+	//if err != nil {
+	//	glog.Fatalf("dbs.Connect() error %v", err)
+	//}
+
+	data, err := dbs.NewMock().GetData("")
 	if err != nil {
 		glog.Fatalf("database.GetData() error %v", err)
 	}
 
-	dbscan := engines.NewDBSCAN(data, consts.Eps, consts.EpsNeighborhood)
-	if err = dbscan.Scan(); err != nil {
-		glog.Fatalf("dbscan.Scan() error %v", err)
+	var alg engines.Engines
+	switch cfg.Algorithm.Name {
+	case "dbscan":
+		alg = engines.NewDBSCAN(data, cfg.Algorithm.Epsilon, cfg.Algorithm.MinPoints)
+	case "kmeans":
+		alg = engines.NewKMeans(data, consts.Parts)
+	default:
+		glog.Fatal("Algorithm %v not exist", cfg.Algorithm.Name)
 	}
 
-	kmeans := engines.NewKMeans(data, consts.Parts)
-	if err = kmeans.Scan(); err != nil {
+	if err = alg.Scan(); err != nil {
 		glog.Fatalf("kmeans.Scan() error %v", err)
 	}
 
-	for _, engine := range []engines.Engines{dbscan, kmeans} {
-		if err = engine.Scan(); err != nil {
-			glog.Fatalf("engine.Scan() error %v", err)
-		}
-
-		for clusterID := 0; clusterID < kmeans.Len(); clusterID++ {
-			var x, y = engine.GetCenterClusterById(clusterID)
-			glog.Infof("ClusterID %v X: %v Y: %v", clusterID, x, y)
-		}
-
+	for clusterID := 0; clusterID < alg.Len(); clusterID++ {
+		var x, y = alg.GetCenterClusterById(clusterID)
+		glog.Infof("ClusterID %v X: %v Y: %v", clusterID, x, y)
 	}
+
 }

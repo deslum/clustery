@@ -1,0 +1,11 @@
+{
+  "database": {
+    "engine": "clickhouse",
+    "uri": ""
+  },
+  "algorithm": {
+    "name": "dbscan",
+    "epsilon": 0.3,
+    "min_points": 3
+  }
+}

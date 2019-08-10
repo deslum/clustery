@@ -1,5 +1,5 @@
 package consts
 
 const (
-	Parts = 4
+	Parts = 2
 )
